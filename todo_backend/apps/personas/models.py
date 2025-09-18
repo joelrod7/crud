@@ -2,12 +2,12 @@ from django.db import models
 
 # Create your models here.
 class Persona(models.Model):
-    ident = models.IntegerField(max_length=15, null= False, unique= True, blank=False)
+    ident = models.IntegerField(null= False, unique= True, blank=False)
     nombre = models.CharField(max_length=20, null= False, blank=False)
     apellido = models.CharField(max_length=20, null= False, blank=False)
-    correo = models.CharField(max_length=20, null= False, blank=False, unique=False)
+    correo = models.EmailField(max_length=20, null= False, blank=False, unique=True)
     password = models.CharField(max_length=10, null=False, blank=False)
-    rol = models.IntegerField(max_length=1, null=True, blank=True)
+    rol = models.IntegerField(null=True, blank=True)
     
     class Meta:
         db_table="personas"

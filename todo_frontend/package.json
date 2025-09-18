@@ -1,5 +1,5 @@
 {
-  "name": "todo-front-end",
+  "name": "todo-frontend",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",

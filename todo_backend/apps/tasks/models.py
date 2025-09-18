@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class Tasks(models.Model):
+class Task(models.Model):
     # codigo = models.CharField(max_length=10, null=False)
     titulo = models.CharField(max_length=20, null=False)
     descripcion = models.CharField(max_length=100, null=False)
@@ -11,4 +11,4 @@ class Tasks(models.Model):
     estado = models.IntegerField(null=False)
     
     class Meta:
-        db_table = 'tasks'
+        db_table = 'task'

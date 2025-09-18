@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "todo_front_end": {
+    "todo_frontend": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -53,10 +53,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "todo_front_end:build:production"
+              "buildTarget": "todo_frontend:build:production"
             },
             "development": {
-              "buildTarget": "todo_front_end:build:development"
+              "buildTarget": "todo_frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
