@@ -19,6 +19,7 @@ class CreatePersona(APIView):
 
 
 class Login(APIView):
+    permission_classes = [permissions.AllowAny]
     def post(self, request):
         data = request.data
         try:
