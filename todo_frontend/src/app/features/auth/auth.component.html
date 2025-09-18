@@ -1,0 +1,26 @@
+<div class="auth">
+  <div class="card">
+    <div class="tabs">
+      <button [class.active]="!isLogin()" (click)="switchMode('register')">Registro</button>
+      <button [class.active]="isLogin()" (click)="switchMode('login')">Login</button>
+    </div>
+
+    <div *ngIf="successMsg()" class="ok">{{ successMsg() }}</div>
+    <div *ngIf="errorMsg()" class="err">{{ errorMsg() }}</div>
+
+    <form *ngIf="!isLogin()" [formGroup]="registerForm" (ngSubmit)="onRegister()">
+      <label>Ident <input type="number" formControlName="ident" /></label>
+      <label>Nombre <input type="text" formControlName="nombre" /></label>
+      <label>Apellido <input type="text" formControlName="apellido" /></label>
+      <label>Correo <input type="email" formControlName="correo" /></label>
+      <label>Password <input type="password" formControlName="password" /></label>
+      <button type="submit" [disabled]="loading()">Register</button>
+    </form>
+
+    <form *ngIf="isLogin()" [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <label>Correo <input type="email" formControlName="correo" /></label>
+      <label>Password <input type="password" formControlName="password" /></label>
+      <button type="submit" [disabled]="loading()">Login</button>
+    </form>
+  </div>
+</div>
