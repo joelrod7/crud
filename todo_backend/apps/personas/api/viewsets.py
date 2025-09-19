@@ -35,3 +35,11 @@ class Login(APIView):
 
         except Persona.DoesNotExist:
             return Response({"error": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        
+class PersonasList(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        qs = Persona.objects.all().order_by('id')
+        data = PersonaSerializer(qs, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
