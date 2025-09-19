@@ -7,7 +7,7 @@
   <div *ngIf="errorMsg()" class="alert error">{{ errorMsg() }}</div>
 
   <!-- Filtros y Paginación -->
-  <div class="card filters" [formGroup]="filterForm">
+  <!-- <div class="card filters" [formGroup]="filterForm">
     <div class="row-4">
       <label>Buscar
         <input type="text" formControlName="search" placeholder="título o descripción...">
@@ -19,9 +19,11 @@
         </select>
       </label>
       <label>Usuario
-        <select formControlName="persona">
+        <select formControlName="asignado">
           <option [ngValue]="null">Todos</option>
-          <option *ngFor="let u of users(); trackBy: trackByUser" [ngValue]="u.id">{{ fullName(u) }}</option>
+          <option *ngFor="let u of users(); trackBy: trackByUser" [ngValue]="u.id">
+            {{ fullName(u) }}
+          </option>
         </select>
       </label>
       <label>Página
@@ -39,7 +41,7 @@
       <button class="btn" (click)="goToPage(page()+1)">&raquo;</button>
       <span class="muted">Total: {{ total() }}</span>
     </div>
-  </div>
+  </div> -->
 
   <div class="grid-2">
     <!-- Crear usuario -->
@@ -139,7 +141,7 @@
                 <td>{{ t.fecha_inicio | date:'short' }}</td>
                 <td>{{ t.fecha_fin | date:'short' }}</td>
                 <td>{{ statusLabel(t.estado) }}</td>
-                <td>{{ assignedName(t.persona) }}</td>
+                <td>{{ assignedName(t.asignado) }}</td>
                 <td class="center">
                   <button class="btn" (click)="startEdit(t)">Editar</button>
                 </td>
@@ -160,7 +162,7 @@
                       </label>
 
                       <label>Asignado
-                        <select formControlName="persona">
+                        <select formControlName="asignado">
                           <option [ngValue]="null">--</option>
                           <option *ngFor="let u of users(); trackBy: trackByUser" [ngValue]="u.id">{{ fullName(u) }}</option>
                         </select>

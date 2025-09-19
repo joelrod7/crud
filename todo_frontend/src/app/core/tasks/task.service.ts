@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { CreateTaskDto, Task, Paginated } from './task.types';
@@ -9,7 +9,7 @@ export interface TaskQuery {
   page_size?: number;
   search?: string;
   estado?: number | null;
-  persona?: number | null;
+  asignado?: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -18,12 +18,12 @@ export class TaskService {
   constructor(private http: HttpClient) {}
 
   list(q: TaskQuery = {}): Observable<Task[] | Paginated<Task>> {
-    const params: any = {};
-    if (q.page) params['page'] = q.page;
-    if (q.page_size) params['page_size'] = q.page_size;
-    if (q.search) params['search'] = q.search;
-    if (q.estado !== undefined && q.estado !== null) params['estado'] = q.estado;
-    if (q.persona !== undefined && q.persona !== null) params['persona'] = q.persona;
+    let params = new HttpParams();
+    if (q.page) params = params.set('page', String(q.page));
+    if (q.page_size) params = params.set('page_size', String(q.page_size));
+    if (q.search && q.search.trim()) params = params.set('search', q.search.trim());
+    if (q.estado !== null && q.estado !== undefined) params = params.set('estado', String(q.estado));
+    if (q.asignado !== null && q.asignado !== undefined) params = params.set('asignado', String(q.asignado));
     return this.http.get<Task[] | Paginated<Task>>(`${this.baseUrl}/tasks/`, { params });
   }
 
@@ -31,7 +31,7 @@ export class TaskService {
     return this.http.post<Task>(`${this.baseUrl}/tasks/`, dto);
   }
 
-  patch(id: number, partial: Partial<CreateTaskDto>): Observable<Task> {
+  patch(id: number, partial: Partial<CreateTaskDto> & { asignado?: number | null }): Observable<Task> {
     return this.http.patch<Task>(`${this.baseUrl}/tasks/${id}/`, partial);
   }
 

@@ -45,7 +45,7 @@ export class TodoComponent {
   filterForm = this.fb.nonNullable.group({
     search: [''],
     estado: [null as number | null],
-    persona: [null as number | null],
+    asignado: [null as number | null],
   });
 
   // Form creación tarea
@@ -65,7 +65,7 @@ export class TodoComponent {
     fecha_inicio: ['', [Validators.required]],
     fecha_fin: ['', [Validators.required]],
     estado: [0 as TaskEstado, []],
-    persona: [null as number | null, []]
+    asignado: [null as number | null, []]
   });
 
   // Form creación usuario
@@ -96,22 +96,17 @@ export class TodoComponent {
   loadTasks() {
     this.loadingTasks.set(true);
     this.errorMsg.set(null);
-    const query: TaskQuery = {
+    const query = {
       page: this.page(),
       page_size: this.pageSize(),
       search: this.filterForm.controls.search.value || undefined,
       estado: this.filterForm.controls.estado.value,
-      persona: this.filterForm.controls.persona.value
+      asignado: this.filterForm.controls.asignado.value,
     };
     this.taskSvc.list(query).subscribe({
       next: (res) => {
-        if (isPaginated<Task>(res)) {
-          this.tasks.set(res.results);
-          this.total.set(res.count);
-        } else {
-          this.tasks.set(res);
-          this.total.set(res.length);
-        }
+        if (Array.isArray(res)) { this.tasks.set(res); this.total.set(res.length); }
+        else { this.tasks.set(res.results); this.total.set(res.count); }
       },
       error: (err) => this.errorMsg.set(humanizeHttpError(err))
     }).add(() => this.loadingTasks.set(false));
@@ -157,7 +152,6 @@ export class TodoComponent {
   // Edición inline
   startEdit(t: Task) {
     this.editingId.set(t.id);
-    // Normaliza a 'YYYY-MM-DDTHH:mm' si vienen ISO
     const toLocalInput = (iso: string) => {
       const d = new Date(iso);
       const pad = (n: number) => n.toString().padStart(2,'0');
@@ -169,7 +163,7 @@ export class TodoComponent {
       fecha_inicio: toLocalInput(t.fecha_inicio),
       fecha_fin: toLocalInput(t.fecha_fin),
       estado: t.estado,
-      persona: (t.persona ?? null)
+      asignado: t.asignado ?? null
     });
   }
 
@@ -185,7 +179,7 @@ export class TodoComponent {
       fecha_inicio: this.toIsoLocal(val.fecha_inicio),
       fecha_fin: this.toIsoLocal(val.fecha_fin),
       estado: val.estado,
-      persona: val.persona
+      asignado: val.asignado
     };
     this.taskSvc.patch(t.id, partial).subscribe({
       next: () => { this.editingId.set(null); this.loadTasks(); },
@@ -227,7 +221,11 @@ export class TodoComponent {
 
   // UX
   fullName(u: Persona) { return `${u.nombre} ${u.apellido}`.trim(); }
-  assignedName(id?: number) { const u = this.users().find(x => x.id === id); return u ? this.fullName(u) : '—'; }
+  assignedName(id: number | null | undefined): string {
+    if (id == null) return '—';
+    const u = this.users().find(x => x.id === id);
+    return u ? this.fullName(u) : '—';
+  }
   pages(): number[] {
     const last = Math.max(1, Math.ceil(this.total() / this.pageSize()));
     const current = this.page();

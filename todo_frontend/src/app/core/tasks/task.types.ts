@@ -8,7 +8,7 @@ export interface Task {
   fecha_inicio: string;
   fecha_fin: string;
   estado: TaskEstado;
-  persona?: number;
+  asignado?: number;
 }
 
 export interface CreateTaskDto {
