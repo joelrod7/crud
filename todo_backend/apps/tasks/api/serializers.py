@@ -13,5 +13,6 @@ class TaskSerializer(serializers.ModelSerializer):
                 'estado', 
                 'asignado', 
                 'usuario_registro',
+                'activo',
                 )
         read_only_fields = ('id', 'fecha_creacion', 'usuario_registro')
