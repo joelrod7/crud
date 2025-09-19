@@ -8,6 +8,21 @@ import { Task, Paginated, TASK_STATUS_OPTIONS, TaskEstado } from '../../core/tas
 import { UserService } from '../../core/users/user.service';
 import { Persona } from '../../core/users/user.types';
 import { humanizeHttpError } from '../../core/utils/http-error.util';
+import {
+  NgxMatDatetimePickerModule,
+  NgxMatTimepickerModule,
+  NgxMatNativeDateModule,
+} from '@cahdev-angular-material-components/datetime-picker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+
+// Material
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 function isPaginated<T>(data: any): data is Paginated<T> {
   return !!data && typeof data === 'object' && Array.isArray(data.results);
@@ -16,7 +31,13 @@ function isPaginated<T>(data: any): data is Paginated<T> {
 @Component({
   standalone: true,
   selector: 'app-todo',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule,
+    MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule,
+    NgxMatDatetimePickerModule,
+    NgxMatTimepickerModule,
+    NgxMatNativeDateModule,
+    MatDatepickerModule,
+  ],
   templateUrl: './todo.component.html',
   styleUrls: ['./todo.component.css']
 })
@@ -52,8 +73,8 @@ export class TodoComponent {
   taskForm = this.fb.nonNullable.group({
     titulo: ['', [Validators.required, Validators.maxLength(20)]],
     descripcion: ['', [Validators.required, Validators.maxLength(100)]],
-    fecha_inicio: ['', [Validators.required]],
-    fecha_fin: ['', [Validators.required]],
+    fecha_inicio: [null as Date | null, Validators.required],
+    fecha_fin: [null as Date | null, Validators.required],
     estado: [0 as TaskEstado, [Validators.required]],
     // persona: [null as number | null, [Validators.required]]
   });
@@ -62,8 +83,8 @@ export class TodoComponent {
   editForm = this.fb.nonNullable.group({
     titulo: ['', [Validators.required, Validators.maxLength(20)]],
     descripcion: ['', [Validators.required, Validators.maxLength(100)]],
-    fecha_inicio: ['', [Validators.required]],
-    fecha_fin: ['', [Validators.required]],
+    fecha_inicio: [null as Date | null, Validators.required],
+    fecha_fin: [null as Date | null, Validators.required],
     estado: [0 as TaskEstado, []],
     asignado: [null as number | null, []]
   });
@@ -90,7 +111,11 @@ export class TodoComponent {
     this.filterForm.valueChanges.subscribe(() => { this.page.set(1); this.loadTasks(); });
   }
 
-  private toIsoLocal(v: string) { return new Date(v).toISOString(); }
+  private toIsoLocal(v: Date | string) {
+    const d = v instanceof Date ? v : new Date(v);
+    return d.toISOString();
+  }
+
 
   // Cargas
   loadTasks() {
@@ -125,19 +150,20 @@ export class TodoComponent {
   saveTask() {
     if (this.taskForm.invalid) { this.taskForm.markAllAsTouched(); return; }
     const { titulo, descripcion, fecha_inicio, fecha_fin, estado } = this.taskForm.getRawValue();
-    const start = new Date(fecha_inicio); const end = new Date(fecha_fin);
-    if (start >= end) { this.errorMsg.set('La fecha de inicio debe ser menor que la fecha fin.'); return; }
+
+    const fi = this.toIsoLocal(fecha_inicio!);
+    const ff = this.toIsoLocal(fecha_fin!);
+    if (new Date(fi) >= new Date(ff)) { this.errorMsg.set('La fecha de inicio debe ser menor que la fecha fin.'); return; }
 
     this.creatingTask.set(true);
-    this.taskSvc.create({
-      titulo, descripcion,
-      fecha_inicio: this.toIsoLocal(fecha_inicio),
-      fecha_fin: this.toIsoLocal(fecha_fin),
-      estado
-    }).subscribe({
-      next: () => { this.taskForm.reset({ titulo:'', descripcion:'', fecha_inicio:'', fecha_fin:'', estado:0 }); this.loadTasks(); },
-      error: (err) => this.errorMsg.set(humanizeHttpError(err))
-    }).add(() => this.creatingTask.set(false));
+    this.taskSvc.create({ titulo, descripcion, fecha_inicio: fi, fecha_fin: ff, estado })
+      .subscribe({
+        next: () => {
+          this.taskForm.reset({ titulo:'', descripcion:'', fecha_inicio:null, fecha_fin:null, estado:0 });
+          this.loadTasks();
+        },
+        error: (err) => this.errorMsg.set(humanizeHttpError(err))
+      }).add(() => this.creatingTask.set(false));
   }
 
   saveUser() {
@@ -152,16 +178,11 @@ export class TodoComponent {
   // Edición inline
   startEdit(t: Task) {
     this.editingId.set(t.id);
-    const toLocalInput = (iso: string) => {
-      const d = new Date(iso);
-      const pad = (n: number) => n.toString().padStart(2,'0');
-      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    };
     this.editForm.reset({
       titulo: t.titulo,
       descripcion: t.descripcion,
-      fecha_inicio: toLocalInput(t.fecha_inicio),
-      fecha_fin: toLocalInput(t.fecha_fin),
+      fecha_inicio: new Date(t.fecha_inicio),
+      fecha_fin: new Date(t.fecha_fin),
       estado: t.estado,
       asignado: t.asignado ?? null
     });
@@ -172,16 +193,20 @@ export class TodoComponent {
   saveEdit(t: Task) {
     if (this.editForm.invalid) { this.editForm.markAllAsTouched(); return; }
     this.savingRow.set(t.id);
-    const val = this.editForm.getRawValue();
-    const partial: any = {
-      titulo: val.titulo,
-      descripcion: val.descripcion,
-      fecha_inicio: this.toIsoLocal(val.fecha_inicio),
-      fecha_fin: this.toIsoLocal(val.fecha_fin),
-      estado: val.estado,
-      asignado: val.asignado
-    };
-    this.taskSvc.patch(t.id, partial).subscribe({
+    const v = this.editForm.getRawValue();
+
+    const fi = this.toIsoLocal(v.fecha_inicio!);
+    const ff = this.toIsoLocal(v.fecha_fin!);
+    if (new Date(fi) >= new Date(ff)) { this.errorMsg.set('La fecha de inicio debe ser menor que la fecha fin.'); this.savingRow.set(null); return; }
+
+    this.taskSvc.patch(t.id, {
+      titulo: v.titulo,
+      descripcion: v.descripcion,
+      estado: v.estado,
+      asignado: v.asignado,
+      fecha_inicio: this.toIsoLocal(v.fecha_inicio!),
+      fecha_fin: this.toIsoLocal(v.fecha_fin!)
+    }).subscribe({
       next: () => { this.editingId.set(null); this.loadTasks(); },
       error: (err) => this.errorMsg.set(humanizeHttpError(err))
     }).add(() => this.savingRow.set(null));
@@ -239,4 +264,14 @@ export class TodoComponent {
 
   trackByTask = (_: number, t: Task) => t.id;
   trackByUser = (_: number, u: Persona) => u.id;
+
+  hideTask(t: Task) {
+    // if (!confirm(`Ocultar tarea "${t.titulo}"?`)) return;
+
+    this.savingRow.set(t.id);
+    this.taskSvc.patch(t.id, { activo: 0 }).subscribe({
+      next: () => this.loadTasks(),
+      error: (err) => this.errorMsg.set(humanizeHttpError(err))
+    }).add(() => this.savingRow.set(null));
+  }
 }

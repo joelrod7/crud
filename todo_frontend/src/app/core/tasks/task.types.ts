@@ -9,6 +9,7 @@ export interface Task {
   fecha_fin: string;
   estado: TaskEstado;
   asignado?: number;
+  activo?: number;
 }
 
 export interface CreateTaskDto {

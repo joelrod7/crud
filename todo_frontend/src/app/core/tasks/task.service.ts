@@ -31,7 +31,10 @@ export class TaskService {
     return this.http.post<Task>(`${this.baseUrl}/tasks/`, dto);
   }
 
-  patch(id: number, partial: Partial<CreateTaskDto> & { asignado?: number | null }): Observable<Task> {
+  patch(
+    id: number,
+    partial: Partial<CreateTaskDto> & { asignado?: number | null; activo?: number }
+  ) {
     return this.http.patch<Task>(`${this.baseUrl}/tasks/${id}/`, partial);
   }
 

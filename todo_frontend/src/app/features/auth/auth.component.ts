@@ -4,10 +4,20 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 
+// Material
+import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+
 @Component({
   standalone: true,
   selector: 'app-auth',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, ReactiveFormsModule,
+    MatCardModule, MatTabsModule, MatFormFieldModule, MatInputModule, MatButtonModule
+  ],
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
@@ -23,7 +33,7 @@ export class AuthComponent {
   isLogin = computed(() => this.mode() === 'login');
 
   registerForm = this.fb.nonNullable.group({
-    ident: [0, [Validators.required, Validators.min(1)]],
+    ident: [null, [Validators.required, Validators.min(1)]],
     nombre: ['', [Validators.required, Validators.maxLength(100)]],
     apellido: ['', [Validators.required, Validators.maxLength(100)]],
     correo: ['', [Validators.required, Validators.email]],
@@ -38,7 +48,7 @@ export class AuthComponent {
   switchMode(m: 'login'|'register') { this.errorMsg.set(null); this.successMsg.set(null); this.mode.set(m); }
 
   onRegister() {
-    if (this.registerForm.invalid) return this.registerForm.markAllAsTouched();
+    if (this.registerForm.invalid) { this.registerForm.markAllAsTouched(); return; }
     this.loading.set(true);
     this.auth.register(this.registerForm.getRawValue()).subscribe({
       next: () => { this.successMsg.set('Registro exitoso. Inicia sesión.'); this.switchMode('login'); },
@@ -47,7 +57,7 @@ export class AuthComponent {
   }
 
   onLogin() {
-    if (this.loginForm.invalid) return this.loginForm.markAllAsTouched();
+    if (this.loginForm.invalid) { this.loginForm.markAllAsTouched(); return; }
     this.loading.set(true);
     this.auth.login(this.loginForm.getRawValue()).subscribe({
       next: () => this.router.navigateByUrl('/todo'),

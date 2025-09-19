@@ -1,1 +1,53 @@
 /* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Contenedor centrado con padding general */
+.app-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: #0f172a;
+  /* padding: 24px; */
+  justify-content: center;
+}
+
+/* Tarjetas Material con padding interno y bordes suaves */
+.mat-mdc-card {
+  padding: 16px;
+  border-radius: 12px;
+}
+
+
+.mat-mdc-form-field {
+  width: 100%;
+  margin-top: 12px; /* espacio entre inputs */
+}
+
+/* Botones al 100% en formularios */
+.form-actions {
+  margin-top: 8px;
+  display: grid;
+}
+.form-actions > button {
+  width: 100%;
+}
+
+.cdk-overlay-container {
+  z-index: 10000;
+}
+
+.cdk-overlay-pane .mat-datepicker-content,
+.cdk-overlay-pane ngx-mat-datetime-content,
+.cdk-overlay-pane .ngx-mat-datetime-content,
+.cdk-overlay-pane .mat-calendar {
+  background: #fff !important;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.cdk-overlay-pane .ngx-mat-timepicker,
+.cdk-overlay-pane .ngx-mat-timepicker .ngx-mat-timepicker-content {
+  background: #fff !important;
+}

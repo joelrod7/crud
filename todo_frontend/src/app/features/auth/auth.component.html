@@ -1,26 +1,64 @@
-<div class="auth">
-  <div class="card">
-    <div class="tabs">
-      <button [class.active]="!isLogin()" (click)="switchMode('register')">Registro</button>
-      <button [class.active]="isLogin()" (click)="switchMode('login')">Login</button>
-    </div>
+<div class="app-shell mat-typography">
+  <mat-card class="auth-card mat-elevation-z6">
+    <mat-tab-group dynamicHeight (selectedIndexChange)="switchMode($event===0 ? 'register' : 'login')">
+      <mat-tab label="Registro">
+        <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>CC</mat-label>
+            <input matInput type="number" formControlName="ident">
+            <mat-error *ngIf="registerForm.controls.ident.invalid">Requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre">
+            <mat-error *ngIf="registerForm.controls.nombre.invalid">Requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido</mat-label>
+            <input matInput formControlName="apellido">
+            <mat-error *ngIf="registerForm.controls.apellido.invalid">Requerido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Correo</mat-label>
+            <input matInput type="email" formControlName="correo">
+            <mat-error *ngIf="registerForm.controls.correo.invalid">Correo inválido</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password">
+            <mat-error *ngIf="registerForm.controls.password.invalid">Mínimo 6 caracteres</mat-error>
+          </mat-form-field>
+
+          <div class="actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="loading()">Registrar</button>
+          </div>
+        </form>
+      </mat-tab>
+
+      <mat-tab label="Login">
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Correo</mat-label>
+            <input matInput type="email" formControlName="correo">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input matInput type="password" formControlName="password">
+          </mat-form-field>
+
+          <div class="actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="loading()">Entrar</button>
+          </div>
+        </form>
+      </mat-tab>
+    </mat-tab-group>
 
     <div *ngIf="successMsg()" class="ok">{{ successMsg() }}</div>
     <div *ngIf="errorMsg()" class="err">{{ errorMsg() }}</div>
-
-    <form *ngIf="!isLogin()" [formGroup]="registerForm" (ngSubmit)="onRegister()">
-      <label>CC <input type="number" formControlName="ident" /></label>
-      <label>Nombre <input type="text" formControlName="nombre" /></label>
-      <label>Apellido <input type="text" formControlName="apellido" /></label>
-      <label>Correo <input type="email" formControlName="correo" /></label>
-      <label>Password <input type="password" formControlName="password" /></label>
-      <button type="submit" [disabled]="loading()">Register</button>
-    </form>
-
-    <form *ngIf="isLogin()" [formGroup]="loginForm" (ngSubmit)="onLogin()">
-      <label>Correo <input type="email" formControlName="correo" /></label>
-      <label>Password <input type="password" formControlName="password" /></label>
-      <button type="submit" [disabled]="loading()">Login</button>
-    </form>
-  </div>
+  </mat-card>
 </div>

@@ -1,7 +1,7 @@
-<div class="wrap">
+<div class="wrap mat-typography">
   <div class="bar">
     <h2>Gestión de Tareas y Usuarios</h2>
-    <button class="btn danger" (click)="logout()">Salir</button>
+    <button mat-stroked-button color="warn" (click)="logout()">Salir</button>
   </div>
 
   <div *ngIf="errorMsg()" class="alert error">{{ errorMsg() }}</div>
@@ -44,58 +44,88 @@
   </div> -->
 
   <div class="grid-2">
-    <!-- Crear usuario -->
-    <form class="card" [formGroup]="userForm" (ngSubmit)="saveUser()">
+    <mat-card class="mat-elevation-z2">
       <h3>Registrar usuario</h3>
-      <div class="row-2">
-        <label>CC <input type="number" formControlName="ident"></label>
-        <label>Correo <input type="email" formControlName="correo"></label>
-      </div>
-      <div class="row-2">
-        <label>Nombre <input type="text" formControlName="nombre"></label>
-        <label>Apellido <input type="text" formControlName="apellido"></label>
-      </div>
-      <label>Password <input type="password" formControlName="password"></label>
-      <button class="btn primary" type="submit" [disabled]="creatingUser() || userForm.invalid">
-        {{ creatingUser() ? 'Guardando...' : 'Guardar usuario' }}
-      </button>
-    </form>
+      <form [formGroup]="userForm" (ngSubmit)="saveUser()" class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>CC</mat-label>
+          <input matInput type="number" formControlName="ident">
+        </mat-form-field>
 
-    <!-- Crear tarea -->
-    <form class="card" [formGroup]="taskForm" (ngSubmit)="saveTask()">
+        <mat-form-field appearance="outline">
+          <mat-label>Correo</mat-label>
+          <input matInput type="email" formControlName="correo">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="nombre">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Apellido</mat-label>
+          <input matInput formControlName="apellido">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password">
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="creatingUser() || userForm.invalid">
+          {{ creatingUser() ? 'Guardando...' : 'Guardar usuario' }}
+        </button>
+      </form>
+    </mat-card>
+
+    <mat-card class="mat-elevation-z2">
       <h3>Crear tarea</h3>
-      <div class="row-2">
-        <label>Título <input type="text" formControlName="titulo" maxlength="20"></label>
-        <label>Estado
-          <select formControlName="estado">
-            <option *ngFor="let s of statusOpts" [ngValue]="s.value">{{ s.label }}</option>
-          </select>
-        </label>
-      </div>
-      <label>Descripción <input type="text" formControlName="descripcion" maxlength="100"></label>
-      <div class="row-2">
-        <label>Inicio <input type="datetime-local" formControlName="fecha_inicio"></label>
-        <label>Fin <input type="datetime-local" formControlName="fecha_fin"></label>
-      </div>
-      <!-- <label>Asignar a
-        <select formControlName="persona">
-          <option [ngValue]="null">-- Selecciona usuario --</option>
-          <option *ngFor="let u of users(); trackBy: trackByUser" [ngValue]="u.id">{{ fullName(u) }}</option>
-        </select>
-      </label> -->
-      <button class="btn primary" type="submit" [disabled]="creatingTask() || taskForm.invalid">
-        {{ creatingTask() ? 'Guardando...' : 'Guardar tarea' }}
-      </button>
-    </form>
+      <form [formGroup]="taskForm" (ngSubmit)="saveTask()" class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Título</mat-label>
+          <input matInput formControlName="titulo" maxlength="20">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option *ngFor="let s of statusOpts" [value]="s.value">{{ s.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Descripción</mat-label>
+          <input matInput formControlName="descripcion" maxlength="100">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Inicio</mat-label>
+          <input matInput [ngxMatDatetimePicker]="fiPicker" formControlName="fecha_inicio" placeholder="Elegir fecha y hora">
+          <ngx-mat-datepicker-toggle matSuffix [for]="fiPicker"></ngx-mat-datepicker-toggle>
+          <ngx-mat-datetime-picker #fiPicker [showSpinners]="true" [stepMinute]="5"></ngx-mat-datetime-picker>
+        </mat-form-field>
+
+        <!-- Fin -->
+        <mat-form-field appearance="outline">
+          <mat-label>Fin</mat-label>
+          <input matInput [ngxMatDatetimePicker]="ffPicker" formControlName="fecha_fin" placeholder="Elegir fecha y hora">
+          <ngx-mat-datepicker-toggle matSuffix [for]="ffPicker"></ngx-mat-datepicker-toggle>
+          <ngx-mat-datetime-picker #ffPicker [showSpinners]="true" [stepMinute]="5"></ngx-mat-datetime-picker>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="creatingTask() || taskForm.invalid">
+          {{ creatingTask() ? 'Guardando...' : 'Guardar tarea' }}
+        </button>
+      </form>
+    </mat-card>
   </div>
 
   <!-- Listados -->
   <div class="grid-2">
-    <!-- Usuarios -->
-    <div class="card">
+    <mat-card class="mat-elevation-z1">
       <h3>Usuarios</h3>
       <div class="table-wrap" [class.loading]="loadingUsers()">
-        <table>
+        <table class="mat-elevation-z1">
           <thead>
             <tr><th>CC</th><th>Nombre</th><th>Correo</th></tr>
           </thead>
@@ -106,19 +136,20 @@
               <td>{{ u.correo }}</td>
             </tr>
             <tr *ngIf="!loadingUsers() && users().length === 0">
-              <td colspan="4" class="empty">Sin usuarios</td>
+              <td colspan="3" class="empty">Sin usuarios</td>
             </tr>
           </tbody>
         </table>
-        <div class="spinner" *ngIf="loadingUsers()">Cargando...</div>
+        <div class="spinner" *ngIf="loadingUsers()">
+          <mat-spinner diameter="36"></mat-spinner>
+        </div>
       </div>
-    </div>
+    </mat-card>
 
-    <!-- Tareas con edición inline y cambio de estado -->
-    <div class="card">
+    <mat-card class="mat-elevation-z1">
       <h3>Tareas</h3>
       <div class="table-wrap" [class.loading]="loadingTasks()">
-        <table>
+        <table class="mat-elevation-z1">
           <thead>
             <tr>
               <th>Título</th>
@@ -133,7 +164,6 @@
           </thead>
           <tbody>
             <tr *ngFor="let t of tasks(); trackBy: trackByTask">
-              <!-- Vista normal -->
               <ng-container *ngIf="editingId() !== t.id; else editRow">
                 <td>{{ t.titulo }}</td>
                 <td>{{ t.descripcion }}</td>
@@ -143,43 +173,68 @@
                 <td>{{ statusLabel(t.estado) }}</td>
                 <td>{{ assignedName(t.asignado) }}</td>
                 <td class="center">
-                  <button class="btn" (click)="startEdit(t)">Editar</button>
+                  <button mat-stroked-button color="primary" (click)="startEdit(t)">Editar</button>
+                  <button mat-stroked-button color="warn"
+                          [disabled]="savingRow()===t.id"
+                          (click)="hideTask(t)">
+                    Ocultar
+                  </button>
                 </td>
               </ng-container>
 
-              <!-- Fila edición -->
               <ng-template #editRow>
                 <td colspan="7">
                   <form [formGroup]="editForm" class="row-edit">
                     <div class="row-3">
-                      <label>Título <input type="text" formControlName="titulo" maxlength="20"></label>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Título</mat-label>
+                        <input matInput formControlName="titulo" maxlength="20">
+                      </mat-form-field>
 
-                      <!-- ✅ Estado como select con labels -->
-                      <label>Estado
-                        <select formControlName="estado">
-                          <option *ngFor="let s of statusOpts" [ngValue]="s.value">{{ s.label }}</option>
-                        </select>
-                      </label>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Estado</mat-label>
+                        <mat-select formControlName="estado">
+                          <mat-option *ngFor="let s of statusOpts" [value]="s.value">{{ s.label }}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
 
-                      <label>Asignado
-                        <select formControlName="asignado">
-                          <option [ngValue]="null">--</option>
-                          <option *ngFor="let u of users(); trackBy: trackByUser" [ngValue]="u.id">{{ fullName(u) }}</option>
-                        </select>
-                      </label>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Asignado</mat-label>
+                        <mat-select formControlName="asignado">
+                          <mat-option [value]="null">--</mat-option>
+                          <mat-option *ngFor="let u of users(); trackBy: trackByUser" [value]="u.id">{{ fullName(u) }}</mat-option>
+                        </mat-select>
+                      </mat-form-field>
                     </div>
-                    <label>Descripción <input type="text" formControlName="descripcion" maxlength="100"></label>
+
+                    <mat-form-field appearance="outline" class="full">
+                      <mat-label>Descripción</mat-label>
+                      <input matInput formControlName="descripcion" maxlength="100">
+                    </mat-form-field>
+
                     <div class="row-2">
-                      <label>Inicio <input type="datetime-local" formControlName="fecha_inicio"></label>
-                      <label>Fin <input type="datetime-local" formControlName="fecha_fin"></label>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Inicio</mat-label>
+                        <input matInput [ngxMatDatetimePicker]="fiPicker2" formControlName="fecha_inicio">
+                        <!-- 👇 usar el toggle de ngx, NO el de Mat -->
+                        <ngx-mat-datepicker-toggle matSuffix [for]="fiPicker2"></ngx-mat-datepicker-toggle>
+                        <ngx-mat-datetime-picker #fiPicker2 [showSpinners]="true" [stepMinute]="5"></ngx-mat-datetime-picker>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>Fin</mat-label>
+                        <input matInput [ngxMatDatetimePicker]="ffPicker2" formControlName="fecha_fin">
+                        <ngx-mat-datepicker-toggle matSuffix [for]="ffPicker2"></ngx-mat-datepicker-toggle>
+                        <ngx-mat-datetime-picker #ffPicker2 [showSpinners]="true" [stepMinute]="5"></ngx-mat-datetime-picker>
+                      </mat-form-field>
                     </div>
                   </form>
                 </td>
                 <td class="center">
-                  <button class="btn primary" [disabled]="savingRow()===t.id || editForm.invalid" (click)="saveEdit(t)">
+                  <button mat-raised-button color="primary" [disabled]="savingRow()===t.id || editForm.invalid" (click)="saveEdit(t)">
                     {{ savingRow()===t.id ? 'Guardando...' : 'Guardar' }}
                   </button>
-                  <button class="btn" (click)="cancelEdit()">Cancelar</button>
+                  <button mat-stroked-button (click)="cancelEdit()">Cancelar</button>
                 </td>
               </ng-template>
             </tr>
@@ -189,16 +244,18 @@
             </tr>
           </tbody>
         </table>
-        <div class="spinner" *ngIf="loadingTasks()">Cargando...</div>
+
+        <div class="spinner" *ngIf="loadingTasks()">
+          <mat-spinner diameter="36"></mat-spinner>
+        </div>
       </div>
 
-      <!-- Paginador inferior -->
       <div class="paginator bottom">
-        <button class="btn" (click)="goToPage(page()-1)">&laquo;</button>
-        <button class="btn" *ngFor="let p of pages()" [class.active]="p===page()" (click)="goToPage(p)">{{ p }}</button>
-        <button class="btn" (click)="goToPage(page()+1)">&raquo;</button>
+        <button mat-button (click)="goToPage(page()-1)">&laquo;</button>
+        <button mat-stroked-button *ngFor="let p of pages()" [color]="p===page() ? 'primary' : undefined" (click)="goToPage(p)">{{ p }}</button>
+        <button mat-button (click)="goToPage(page()+1)">&raquo;</button>
         <span class="muted">Total: {{ total() }}</span>
       </div>
-    </div>
+    </mat-card>
   </div>
 </div>
