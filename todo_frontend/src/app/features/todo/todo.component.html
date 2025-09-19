@@ -1,76 +1,202 @@
 <div class="wrap">
   <div class="bar">
-    <h2>Tareas</h2>
+    <h2>Gestión de Tareas y Usuarios</h2>
     <button class="btn danger" (click)="logout()">Salir</button>
   </div>
 
   <div *ngIf="errorMsg()" class="alert error">{{ errorMsg() }}</div>
 
-  <!-- Formulario creación -->
-  <form [formGroup]="form" (ngSubmit)="save()" class="card form">
-    <div class="grid">
-      <label>
-        Título
-        <input type="text" formControlName="titulo" maxlength="20" />
+  <!-- Filtros y Paginación -->
+  <div class="card filters" [formGroup]="filterForm">
+    <div class="row-4">
+      <label>Buscar
+        <input type="text" formControlName="search" placeholder="título o descripción...">
       </label>
-
-      <label class="wide">
-        Descripción
-        <input type="text" formControlName="descripcion" maxlength="100" />
+      <label>Estado
+        <select formControlName="estado">
+          <option [ngValue]="null">Todos</option>
+          <option *ngFor="let s of statusOpts" [ngValue]="s.value">{{ s.label }}</option>
+        </select>
       </label>
-
-      <label>
-        Inicio
-        <input type="datetime-local" formControlName="fecha_inicio" />
+      <label>Usuario
+        <select formControlName="persona">
+          <option [ngValue]="null">Todos</option>
+          <option *ngFor="let u of users(); trackBy: trackByUser" [ngValue]="u.id">{{ fullName(u) }}</option>
+        </select>
       </label>
-
-      <label>
-        Fin
-        <input type="datetime-local" formControlName="fecha_fin" />
-      </label>
-
-      <label>
-        Estado (int)
-        <input type="number" formControlName="estado" />
+      <label>Página
+        <select [value]="pageSize()" (change)="setPageSize($any($event.target).value)">
+          <option [value]="5">5</option>
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+        </select>
       </label>
     </div>
 
-    <button class="btn primary" type="submit" [disabled]="loadingCreate() || form.invalid">
-      {{ loadingCreate() ? 'Guardando...' : 'Guardar' }}
-    </button>
-  </form>
+    <div class="paginator">
+      <button class="btn" (click)="goToPage(page()-1)">&laquo;</button>
+      <button class="btn" *ngFor="let p of pages()" [class.active]="p===page()" (click)="goToPage(p)">{{ p }}</button>
+      <button class="btn" (click)="goToPage(page()+1)">&raquo;</button>
+      <span class="muted">Total: {{ total() }}</span>
+    </div>
+  </div>
 
-  <!-- Tabla -->
-  <div class="card">
-    <div class="table-wrap" [class.loading]="loadingList()">
-      <table>
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Descripción</th>
-            <th>Creación</th>
-            <th>Inicio</th>
-            <th>Fin</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
+  <div class="grid-2">
+    <!-- Crear usuario -->
+    <form class="card" [formGroup]="userForm" (ngSubmit)="saveUser()">
+      <h3>Registrar usuario</h3>
+      <div class="row-2">
+        <label>CC <input type="number" formControlName="ident"></label>
+        <label>Correo <input type="email" formControlName="correo"></label>
+      </div>
+      <div class="row-2">
+        <label>Nombre <input type="text" formControlName="nombre"></label>
+        <label>Apellido <input type="text" formControlName="apellido"></label>
+      </div>
+      <label>Password <input type="password" formControlName="password"></label>
+      <button class="btn primary" type="submit" [disabled]="creatingUser() || userForm.invalid">
+        {{ creatingUser() ? 'Guardando...' : 'Guardar usuario' }}
+      </button>
+    </form>
 
-        <tbody>
-          <tr *ngFor="let t of tasks(); trackBy: trackById">
-            <td>{{ t.titulo }}</td>
-            <td>{{ t.descripcion }}</td>
-            <td>{{ t.fecha_creacion | date:'short' }}</td>
-            <td>{{ t.fecha_inicio    | date:'short' }}</td>
-            <td>{{ t.fecha_fin       | date:'short' }}</td>
-            <td>{{ t.estado }}</td>
-          </tr>
+    <!-- Crear tarea -->
+    <form class="card" [formGroup]="taskForm" (ngSubmit)="saveTask()">
+      <h3>Crear tarea</h3>
+      <div class="row-2">
+        <label>Título <input type="text" formControlName="titulo" maxlength="20"></label>
+        <label>Estado
+          <select formControlName="estado">
+            <option *ngFor="let s of statusOpts" [ngValue]="s.value">{{ s.label }}</option>
+          </select>
+        </label>
+      </div>
+      <label>Descripción <input type="text" formControlName="descripcion" maxlength="100"></label>
+      <div class="row-2">
+        <label>Inicio <input type="datetime-local" formControlName="fecha_inicio"></label>
+        <label>Fin <input type="datetime-local" formControlName="fecha_fin"></label>
+      </div>
+      <!-- <label>Asignar a
+        <select formControlName="persona">
+          <option [ngValue]="null">-- Selecciona usuario --</option>
+          <option *ngFor="let u of users(); trackBy: trackByUser" [ngValue]="u.id">{{ fullName(u) }}</option>
+        </select>
+      </label> -->
+      <button class="btn primary" type="submit" [disabled]="creatingTask() || taskForm.invalid">
+        {{ creatingTask() ? 'Guardando...' : 'Guardar tarea' }}
+      </button>
+    </form>
+  </div>
 
-          <tr *ngIf="!loadingList() && tasks().length === 0">
-            <td colspan="6" class="empty">Sin tareas aún</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="spinner" *ngIf="loadingList()">Cargando...</div>
+  <!-- Listados -->
+  <div class="grid-2">
+    <!-- Usuarios -->
+    <div class="card">
+      <h3>Usuarios</h3>
+      <div class="table-wrap" [class.loading]="loadingUsers()">
+        <table>
+          <thead>
+            <tr><th>CC</th><th>Nombre</th><th>Correo</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of users(); trackBy: trackByUser">
+              <td>{{ u.ident }}</td>
+              <td>{{ fullName(u) }}</td>
+              <td>{{ u.correo }}</td>
+            </tr>
+            <tr *ngIf="!loadingUsers() && users().length === 0">
+              <td colspan="4" class="empty">Sin usuarios</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="spinner" *ngIf="loadingUsers()">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- Tareas con edición inline y cambio de estado -->
+    <div class="card">
+      <h3>Tareas</h3>
+      <div class="table-wrap" [class.loading]="loadingTasks()">
+        <table>
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Creación</th>
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th>Estado</th>
+              <th>Asignado</th>
+              <th class="center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of tasks(); trackBy: trackByTask">
+              <!-- Vista normal -->
+              <ng-container *ngIf="editingId() !== t.id; else editRow">
+                <td>{{ t.titulo }}</td>
+                <td>{{ t.descripcion }}</td>
+                <td>{{ t.fecha_creacion | date:'short' }}</td>
+                <td>{{ t.fecha_inicio | date:'short' }}</td>
+                <td>{{ t.fecha_fin | date:'short' }}</td>
+                <td>{{ statusLabel(t.estado) }}</td>
+                <td>{{ assignedName(t.persona) }}</td>
+                <td class="center">
+                  <button class="btn" (click)="startEdit(t)">Editar</button>
+                </td>
+              </ng-container>
+
+              <!-- Fila edición -->
+              <ng-template #editRow>
+                <td colspan="7">
+                  <form [formGroup]="editForm" class="row-edit">
+                    <div class="row-3">
+                      <label>Título <input type="text" formControlName="titulo" maxlength="20"></label>
+
+                      <!-- ✅ Estado como select con labels -->
+                      <label>Estado
+                        <select formControlName="estado">
+                          <option *ngFor="let s of statusOpts" [ngValue]="s.value">{{ s.label }}</option>
+                        </select>
+                      </label>
+
+                      <label>Asignado
+                        <select formControlName="persona">
+                          <option [ngValue]="null">--</option>
+                          <option *ngFor="let u of users(); trackBy: trackByUser" [ngValue]="u.id">{{ fullName(u) }}</option>
+                        </select>
+                      </label>
+                    </div>
+                    <label>Descripción <input type="text" formControlName="descripcion" maxlength="100"></label>
+                    <div class="row-2">
+                      <label>Inicio <input type="datetime-local" formControlName="fecha_inicio"></label>
+                      <label>Fin <input type="datetime-local" formControlName="fecha_fin"></label>
+                    </div>
+                  </form>
+                </td>
+                <td class="center">
+                  <button class="btn primary" [disabled]="savingRow()===t.id || editForm.invalid" (click)="saveEdit(t)">
+                    {{ savingRow()===t.id ? 'Guardando...' : 'Guardar' }}
+                  </button>
+                  <button class="btn" (click)="cancelEdit()">Cancelar</button>
+                </td>
+              </ng-template>
+            </tr>
+
+            <tr *ngIf="!loadingTasks() && tasks().length === 0">
+              <td colspan="8" class="empty">Sin tareas</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="spinner" *ngIf="loadingTasks()">Cargando...</div>
+      </div>
+
+      <!-- Paginador inferior -->
+      <div class="paginator bottom">
+        <button class="btn" (click)="goToPage(page()-1)">&laquo;</button>
+        <button class="btn" *ngFor="let p of pages()" [class.active]="p===page()" (click)="goToPage(p)">{{ p }}</button>
+        <button class="btn" (click)="goToPage(page()+1)">&raquo;</button>
+        <span class="muted">Total: {{ total() }}</span>
+      </div>
     </div>
   </div>
 </div>

@@ -9,7 +9,7 @@
     <div *ngIf="errorMsg()" class="err">{{ errorMsg() }}</div>
 
     <form *ngIf="!isLogin()" [formGroup]="registerForm" (ngSubmit)="onRegister()">
-      <label>Ident <input type="number" formControlName="ident" /></label>
+      <label>CC <input type="number" formControlName="ident" /></label>
       <label>Nombre <input type="text" formControlName="nombre" /></label>
       <label>Apellido <input type="text" formControlName="apellido" /></label>
       <label>Correo <input type="email" formControlName="correo" /></label>
