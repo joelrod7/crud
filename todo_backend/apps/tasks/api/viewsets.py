@@ -7,6 +7,9 @@ class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all().order_by('-fecha_creacion')
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        serializer.save(usuario_registro=self.request.user)
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)

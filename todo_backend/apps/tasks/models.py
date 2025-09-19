@@ -9,6 +9,8 @@ class Task(models.Model):
     fecha_inicio = models.DateTimeField(null=False)
     fecha_fin = models.DateTimeField(null=False)
     estado = models.IntegerField(null=False)
+    asignado = models.ForeignKey('personas.Persona', null=True, on_delete=models.SET_NULL, related_name='usuario_task')
+    usuario_registro = models.ForeignKey('personas.Persona', on_delete=models.PROTECT, related_name='usuario_add_persona', null=False)
     
     class Meta:
         db_table = 'task'

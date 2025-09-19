@@ -5,10 +5,11 @@ from ..models import Persona
 class PersonaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Persona
-        fields = ('ident', 'nombre', 'apellido', 'correo', 'password', 'rol')
+        fields = ('id', 'ident', 'nombre', 'apellido', 'correo', 'password', 'rol')
         extra_kwargs = {
             'password': {'write_only': True},
         }
+        read_only = 'id'
         
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])
